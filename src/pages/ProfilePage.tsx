@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import { useState } from "react";
 import { useParams } from "react-router";
 
 import EditIcon from "../shared/icons/EditIcon";
@@ -30,12 +30,11 @@ const ProfilePage = () => {
     queryKey: ["profile", id],
     queryFn: () =>
       getUserProfileApi(id).then((res) => {
-        console.log(res.data);
         return res.data;
       }),
   });
 
-  const [modalIsOpen, setIsOpen] = React.useState(false);
+  const [modalIsOpen, setIsOpen] = useState(false);
 
   function openModal() {
     setIsOpen(true);
@@ -48,7 +47,7 @@ const ProfilePage = () => {
   function closeModal() {
     setIsOpen(false);
   }
-  console.log(userProfile);
+
   return (
     <div className="flex flex-col items-center justify-center w-full h-screen gap-7">
       <div className="bg-white w-[800px] h-[600px] flex flex-row  px-2 py-3 rounded-xl ">

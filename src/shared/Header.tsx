@@ -11,6 +11,7 @@ const Header = () => {
   const queryClient = useQueryClient();
 
   const data = queryClient.getQueryData(["Accountprofile"]);
+
   const handleLogout = () => {
     removeToken();
     localStorage.clear();
@@ -22,7 +23,7 @@ const Header = () => {
       label: (
         <div
           className="flex flex-row items-center gap-2 px-2 py-1"
-          onClick={() => navigate(`/profile/${data?.id}`)}
+          onClick={() => navigate(`/profile/${data?.data?.account?.id}`)}
         >
           <UserIcon />
           <p className="text-base ">Profile</p>
@@ -65,7 +66,7 @@ const Header = () => {
       >
         <div className="absolute right-0 w-10 h-10 rounded-full cursor-pointer hover:opacity-50 ">
           <img
-            src="https://i.pinimg.com/236x/d9/d3/71/d9d3710a513c8d8b52862eb3f40961c3.jpg"
+            src={data?.data?.account?.avatarPath}
             alt=""
             className="object-scale-down w-full h-full rounded-full "
           />

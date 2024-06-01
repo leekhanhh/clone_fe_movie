@@ -10,12 +10,12 @@ const MainLayout = (props) => {
     queryKey: ["Accountprofile"],
     queryFn: () =>
       getProfileApi().then((res) => {
-        localStorage.setItem("AccountProfile", JSON.stringify(res));
+        localStorage.setItem("AccountProfile", JSON.stringify(res.data));
         return res;
       }),
   });
   return (
-    <div className="h-full min-h-screen px-5 bg-slate-900 font-body">
+    <div className="px-5 mainLayout bg-slate-900 font-body">
       <Header />
       <Outlet />
     </div>

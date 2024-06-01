@@ -6,6 +6,6 @@ export const getUserProfileApi = (param: string) => {
   return UseGet({ url, requiredToken: true });
 };
 export const getProfileApi = () => {
-  const url = `/v1/account/me`;
+  const url = `/v1/user/my-profile`;
   return UseGet({ url, requiredToken: true });
 };
