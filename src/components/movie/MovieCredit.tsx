@@ -1,38 +1,41 @@
+import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { useParams } from "react-router";
-import useSWR from "swr";
-import { apiKey, fetcher } from "../../config";
+import { getlistCastApi } from "../../apis/cast";
+
 const MovieCredit = () => {
   const { id } = useParams();
-  const { data, error } = useSWR(
-    `https://api.themoviedb.org/3/movie/${id}/credits?api_key=${apiKey}`,
-    fetcher
-  );
 
-  // Check Data if not return null
-  if (!data) return null;
+  const { data: listCast } = useQuery({
+    queryKey: ["movieCasts", id],
+    queryFn: () =>
+      getlistCastApi().then((res) => {
+        const tempData = res.data.content.filter((item: object) => {
+          return item.movie.id === parseInt(id);
+        });
+        return tempData;
+      }),
+  });
 
-  const { cast, order, profile_path, name } = data;
-  // Check Cast if not return null
-  if (!cast || cast.length < 0) return null;
   return (
-    <>
-      <h2 className="text-center text-3xl mb-10 font-bold text-white">Casts</h2>
+    <div>
+      <h2 className="mb-10 text-3xl font-bold text-center text-white">Casts</h2>
       <div className="grid grid-cols-4 gap-5">
-        {cast.slice(0, 4).map((item: object) => (
-          <div className="cast-item" key={item.id}>
-            <img
-              src={`https://image.tmdb.org/t/p/original/${item.profile_path}`}
-              className="w-full h-[350px] rounded-lg object-cover mb-3"
-              alt=""
-            />
-            <h2 className="text-center text-white text-xl font-medium">
-              {item.name}
-            </h2>
-          </div>
-        ))}
+        {listCast &&
+          listCast.map((item: object) => (
+            <div className="cast-item" key={item.id}>
+              <img
+                src={item?.image}
+                className="w-full h-[350px] rounded-lg object-cover mb-3"
+                alt=""
+              />
+              <h2 className="text-xl font-medium text-center text-white">
+                {item?.name}
+              </h2>
+            </div>
+          ))}
       </div>
-    </>
+    </div>
   );
 };
 

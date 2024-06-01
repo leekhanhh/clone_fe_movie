@@ -3,6 +3,7 @@ import ErrorPage from "../pages/ErrorPage";
 import HomePage from "../pages/HomePage";
 import MovieDetailPage from "../pages/MovieDetailPage";
 import MoviePage from "../pages/MoviePage";
+import ProfilePage from "../pages/ProfilePage";
 export default function init(routes: object[]) {
   const route = {
     path: "/",
@@ -11,7 +12,7 @@ export default function init(routes: object[]) {
     errorComponent: ErrorPage,
     children: [
       {
-        path: "",
+        path: "home",
         element: <HomePage />,
       },
       {
@@ -23,6 +24,10 @@ export default function init(routes: object[]) {
         path: "/movie/:id",
         exact: true,
         element: <MovieDetailPage />,
+      },
+      {
+        path: "/profile/:id",
+        element: <ProfilePage />,
       },
     ],
   };

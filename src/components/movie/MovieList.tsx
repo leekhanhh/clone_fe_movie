@@ -1,27 +1,34 @@
-import React, { useEffect, useState } from "react";
-import useSWR from "swr";
+import React, { useState } from "react";
+
 import { SwiperSlide, Swiper } from "swiper/react";
-import { apiKey, fetcher } from "../../config";
+
 import MovieCard from "./MovieCard";
+import { useQuery } from "@tanstack/react-query";
+import { getListMovieClientApi } from "../../apis/movie";
 interface MovieListProps {
   type: string;
 }
 const MovieList = (props: MovieListProps) => {
-  const [movies, setMovies] = useState([]);
-  const { data, error } = useSWR(
-    `https://api.themoviedb.org/3/movie/${props.type}?api_key=${apiKey}`,
-    fetcher
-  );
-  useEffect(() => {
-    if (data && data.results) {
-      setMovies(data.results);
-    }
-  }, [data]);
+  const [listMovieState, setListMovieState] = useState<object[]>([]); // Provide the correct type for the state variable
+  const { data: listMovie } = useQuery({
+    queryKey: ["listMovie", props.type],
+    queryFn: () =>
+      getListMovieClientApi(props.type).then((res) => {
+        console.log(res.data.content);
+        const tempData = res.data.content.map((item: object) => {
+          return item.movie;
+        });
+        setListMovieState(tempData);
+        return res.data.content.movie;
+      }),
+  });
+
   return (
     <div className="movie-list ">
       <Swiper grabCursor={true} spaceBetween={40} slidesPerView={"auto"}>
-        {movies.length > 0 &&
-          movies.map((item) => (
+        {listMovieState?.length > 0 &&
+          listMovieState?.map((item) => (
+            // console.log(item)
             <SwiperSlide key={item.id}>
               <MovieCard item={item} key={item.id}></MovieCard>
             </SwiperSlide>

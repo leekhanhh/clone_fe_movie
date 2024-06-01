@@ -6,23 +6,24 @@ interface MovieCardProps {
 }
 const MovieCard = (props: MovieCardProps) => {
   const navigate = useNavigate();
+  console.log(props.item);
   return (
-    <div className="movie-card flex flex-col rounded-lg p-3 bg-slate-800 text-white h-full select-none">
+    <div className="flex flex-col h-full p-3 text-white rounded-lg select-none movie-card bg-slate-800">
       <img
-        src={`https://image.tmdb.org/t/p/w500/${props.item.poster_path}`}
+        src={`https://image.tmdb.org/t/p/w500/${props?.item?.imagePath}`}
         alt=""
         className="w-full h-[250px] object-cover rounded-lg mb-5"
       />
       <div className="flex flex-col flex-1">
-        <h3 className=" text-xl font-bold mb-3">{props.item.title}</h3>
-        <div className="flex items-center justify-between text-sm opacity-50 mb-10">
-          <span>{new Date(props.item.release_date).getFullYear()}</span>
+        <h3 className="mb-3 text-xl font-bold ">{props.item.title}</h3>
+        <div className="flex items-center justify-between mb-10 text-sm opacity-50">
+          <span>{props.item.category.name}</span>
           <span>{props.item.vote_average}</span>
         </div>
 
         <button
           onClick={() => navigate(`/movie/${props.item.id}`)}
-          className="py-3 px-6 rounded-lg capitalize bg-primary w-full mt-auto"
+          className="w-full px-6 py-3 mt-auto capitalize rounded-lg bg-primary"
         >
           Watch now
         </button>

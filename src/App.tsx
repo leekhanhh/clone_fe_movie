@@ -3,7 +3,7 @@ import router from "./router/router";
 
 function App() {
   return (
-    <div className="">
+    <div className="h-full min-h-screen ">
       <RouterProvider router={router} />
     </div>
   );

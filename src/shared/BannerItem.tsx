@@ -6,25 +6,25 @@ interface BannerItemProps {
 const BannerItem = (props: BannerItemProps) => {
   const navigate = useNavigate();
   return (
-    <div className="w-full h-full rounded-lg relative">
+    <div className="relative w-full h-full rounded-lg">
       <div className="overlay absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.5)] to-[rgba(0,0,0,0.5)] rounded-lg"></div>
       <img
-        src={`https://image.tmdb.org/t/p/original/${props.item.poster_path}`}
+        src={`https://image.tmdb.org/t/p/original/${props.item.imagePath}`}
         alt=""
-        className="w-full h-full object-cover rounded-lg object-center"
+        className="object-cover object-center w-full h-full rounded-lg"
       ></img>
-      <div className="absolute left-5 bottom-5 w-full text-white">
-        <h2 className="font-bold text-3xl mb-5">{props.item.original_title}</h2>
+      <div className="absolute w-full text-white left-5 bottom-5">
+        <h2 className="mb-5 text-3xl font-bold">{props.item.title}</h2>
 
-        <div className="flex items-center gap-x-3 mb-8">
-          <h3 className=" font-bold text-xl text-white">Score</h3>
-          <span className="py-2 px-4 border border-white rounded-md">
+        {/* <div className="flex items-center mb-8 gap-x-3">
+          <h3 className="text-xl font-bold text-white ">Score</h3>
+          <span className="px-4 py-2 border border-white rounded-md">
             {props.item.vote_average}
           </span>
-        </div>
+        </div> */}
         <button
           onClick={() => navigate(`/movie/${props.item.id}`)}
-          className="py-3 px-6 rounded-lg bg-primary text-white font-medium "
+          className="px-6 py-3 font-medium text-white rounded-lg bg-primary "
         >
           Watch now
         </button>
