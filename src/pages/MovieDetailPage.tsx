@@ -37,7 +37,7 @@ const MovieDetailPage = (props) => {
       </div>
       <div className="w-full h-[400px] max-w-[800px] mx-auto -mt-[200px] relative z-10 pb-10">
         <img
-          src={`https://image.tmdb.org/t/p/original/${movieDetail?.imagePath}`}
+          src={`${movieDetail?.imagePath}`}
           alt=""
           className="object-cover w-full h-full rounded-xl"
         />
@@ -61,7 +61,7 @@ const MovieDetailPage = (props) => {
         {movieDetail?.overview}
       </p>
       <MovieCredit></MovieCredit>
-      <MovieVideos></MovieVideos>
+      <MovieVideos linkvideo={movieDetail?.videoGridFs}></MovieVideos>
       {/* <SimilarMovies></SimilarMovies> */}
       <div className="flex flex-col">
         <p className="mb-10 text-3xl font-bold text-center text-white ">

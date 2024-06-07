@@ -5,11 +5,12 @@ interface BannerItemProps {
 }
 const BannerItem = (props: BannerItemProps) => {
   const navigate = useNavigate();
+  console.log(props.item.imagePath);
   return (
     <div className="relative w-full h-full rounded-lg">
       <div className="overlay absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.5)] to-[rgba(0,0,0,0.5)] rounded-lg"></div>
       <img
-        src={`https://image.tmdb.org/t/p/original/${props.item.imagePath}`}
+        src={`${props.item.imagePath}`}
         alt=""
         className="object-cover object-center w-full h-full rounded-lg"
       ></img>

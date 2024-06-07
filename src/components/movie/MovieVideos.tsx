@@ -1,7 +1,9 @@
 import React from "react";
 import { useParams } from "react-router";
-
-const MovieVideos = () => {
+interface MovieVideosProps {
+  linkvideo?: string;
+}
+const MovieVideos = (props: MovieVideosProps) => {
   const { id } = useParams();
   // const { data, error } = useSWR(
   //   `https://api.themoviedb.org/3/movie/${id}/videos?api_key=${apiKey}`,
@@ -38,10 +40,7 @@ const MovieVideos = () => {
     // </div>
     <div className="flex flex-col gap-3">
       <p className="mb-10 text-3xl font-bold text-center text-white ">Films</p>
-      <video
-        src="http://localhost:8088/v1/movie/videos/stream/665d89b8cc44a7787b814320"
-        controls
-      ></video>
+      <video src={props.linkvideo} controls></video>
     </div>
   );
 };

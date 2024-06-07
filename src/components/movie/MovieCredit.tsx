@@ -23,14 +23,14 @@ const MovieCredit = () => {
       <div className="grid grid-cols-4 gap-5">
         {listCast &&
           listCast.map((item: object) => (
-            <div className="cast-item" key={item.id}>
+            <div className="cast-item " key={item.id}>
               <img
                 src={item?.image}
                 className="w-full h-[350px] rounded-lg object-cover mb-3"
                 alt=""
               />
               <h2 className="text-xl font-medium text-center text-white">
-                {item?.name}
+                {item?.filmCharacter}
               </h2>
             </div>
           ))}
