@@ -7,7 +7,7 @@ import ProfilePage from "../pages/ProfilePage";
 export default function init(routes: object[]) {
   const route = {
     path: "/",
-    exact: true,
+
     element: <MainLayout />,
     errorComponent: ErrorPage,
     children: [
@@ -17,12 +17,12 @@ export default function init(routes: object[]) {
       },
       {
         path: "/movies",
-        exact: true,
+
         element: <MoviePage />,
       },
       {
         path: "/movie/:id",
-        exact: true,
+
         element: <MovieDetailPage />,
       },
       {

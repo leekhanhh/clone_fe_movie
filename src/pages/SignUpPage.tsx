@@ -4,7 +4,9 @@ import Googleicon from "../shared/icons/Googleicon";
 import { useMutation } from "@tanstack/react-query";
 import { loginApi, registerApi } from "../apis/auth";
 import { useNavigate } from "react-router";
-
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(customParseFormat);
 const SignUpPage = (props) => {
   const navigate = useNavigate();
   const { mutateAsync: register } = useMutation({
@@ -15,18 +17,20 @@ const SignUpPage = (props) => {
     e.preventDefault();
     const data = {
       avatarPath:
-        "https://i.pinimg.com/236x/e8/d7/d0/e8d7d05f392d9c2cf0285ce928fb9f4a.jpg",
-      dateOfBirth: e.target.elements["dob"].value,
+        "https://s3.ap-southeast-1.amazonaws.com/moviewebsite/AVATAR_e8m2M6KT0i.jpg",
+      dateOfBirth: dayjs(e.target.elements["dob"].value).format(
+        "DD/MM/YYYY HH:mm:ss"
+      ),
       email: e.target.elements["email"].value,
       gender: parseInt(e.target.elements["gender"].value),
       password: e.target.elements["password"].value,
       phone: e.target.elements["phone"].value,
       role: 0,
-      username: e.target.elements["username"].value,
+      fullname: e.target.elements["username"].value,
     };
     // console.log(e.target.elements["password"].value);
     register(data).then((res) => {
-      navigate("/login");
+      navigate("/");
     });
     // console.log(e.target.elements["gender"].value);
   };
@@ -104,7 +108,7 @@ const SignUpPage = (props) => {
         <div className="flex items-center justify-end">
           <p
             className="text-sm cursor-pointer opacity-40 hover:text-blue-400"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/")}
           >
             Already have an account
           </p>

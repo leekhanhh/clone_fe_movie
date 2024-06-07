@@ -1,27 +1,44 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import MovieCard from "../components/movie/MovieCard";
 import useDebounce from "../hooks/useDebounce";
-import useSWR from "swr";
-import { apiKey, fetcher } from "../config";
 import { useQuery } from "@tanstack/react-query";
-import { getListMovieClientApi } from "../apis/movie";
+import { listAllMovieApi, searchMovieApi } from "../apis/movie";
+import { useSearchParams } from "react-router-dom";
+import { listAllCategoryApi } from "../apis/category";
+import Category from "../components/category/Category";
 const MoviePage = () => {
   const [nextPage, setNextPage] = useState(1);
-  const [filter, setFilter] = useState("");
+  const [active, setActive] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [categoryType, setCategoryType] = useState(
+    searchParams.get("movieGenreId") || ""
+  );
+  const [filter, setFilter] = useState(searchParams.get("title") || "");
+  const queryParam = useMemo(() => {
+    return { title: filter, movieGenreId: categoryType };
+  }, [filter, categoryType]);
   const { data: listMovie } = useQuery({
-    queryKey: ["listMovie", "all"],
+    queryKey: ["listMovie", queryParam],
     queryFn: () =>
-      getListMovieClientApi("all").then((res) => {
-        console.log(res.data);
+      listAllMovieApi(queryParam).then((res) => {
         return res.data.content;
       }),
   });
-  // const [url, setUrl] = useState(
-  //   `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&page=${nextPage}`
-  // );
-  const filterDebounce = useDebounce(filter, 500);
-  const handleFilterChange = (e) => {
-    setFilter(e.target.value);
+  const { data: listCategory } = useQuery({
+    queryKey: ["listCategory"],
+    queryFn: () =>
+      listAllCategoryApi({ kind: 1 }).then((res) => {
+        return res.data.content;
+      }),
+  });
+  const handleCheckActive = () => {
+    setCategoryType("");
+  };
+  const handleSearch = (e) => {
+    if (e.key === "Enter") {
+      setFilter(e.target.value);
+      // setSearchParams({ title: e.target.value });
+    }
   };
   // const { data, error } = useSWR(url, fetcher);
   // const loading = !data && !error;
@@ -50,16 +67,42 @@ const MoviePage = () => {
   //   return null;
   // }
   // const movies = data?.results || [];
-
+  useEffect(() => {
+    setSearchParams(queryParam);
+    categoryType === "" ? setActive(true) : setActive(false);
+  }, [queryParam]);
   return (
     <div className="py-10 page-container">
-      <div className="flex mb-10">
+      <div className="flex flex-row gap-4">
+        {listCategory?.length > 0 &&
+          listCategory.map((item) => {
+            return (
+              <Category
+                key={item.id}
+                item={item}
+                handleChooseCategory={(id) => {
+                  setCategoryType(id.toString());
+                }}
+              />
+            );
+          })}
+        <div
+          className={`px-2 py-1  rounded-md cursor-pointer hover:bg-red-500 hover:text-white ${
+            active ? "bg-red-500 text-white" : "bg-white"
+          } `}
+          onClick={() => handleCheckActive()}
+        >
+          <p>all</p>
+        </div>
+      </div>
+      <div className="flex mt-5 mb-10">
         <div className="flex-1">
           <input
             type="text"
             className="w-full p-4 text-white outline-none bg-slate-800"
             placeholder="Type here to search..."
-            onChange={handleFilterChange}
+            // onChange={handleFilterChange}
+            onKeyDown={(e) => handleSearch(e)}
           />
         </div>
         <button className="p-4 text-white bg-primary">
@@ -87,7 +130,7 @@ const MoviePage = () => {
         <div className="grid grid-cols-1 gap-10 xl:grid-cols-4">
           {listMovie?.length > 0 &&
             listMovie?.map((item: object) => (
-              <MovieCard key={item.id} item={item}></MovieCard>
+              <MovieCard key={item.id} item={item} kind="default"></MovieCard>
             ))}
         </div>
       </div>

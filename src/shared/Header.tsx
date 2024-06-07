@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Button, Dropdown, Space } from "antd";
+import { Dropdown } from "antd";
 import DoorIcon from "./icons/DoorIcon";
 import UserIcon from "./icons/UserIcon";
 import UseCookie from "../hooks/UseCookie";
@@ -15,7 +15,7 @@ const Header = () => {
   const handleLogout = () => {
     removeToken();
     localStorage.clear();
-    navigate("/login");
+    navigate("/");
   };
   const items = [
     {

@@ -17,7 +17,15 @@ export const getMovieDetailClientApi = (param: string) => {
   const url = `/v1/movie/get-client/${param}`;
   return UseGet({ url, requiredToken: true });
 };
-export const getListFavoriteMovieApi = () => {
-  const url = "/v1/favorite-list/list";
-  return UseGet({ url, requiredToken: true });
+export const getListFavoriteMovieByAccountIdApi = (params) => {
+  const url = `v1/favorite-list/list-movie-by-accountId`;
+  return UseGet({ url, requiredToken: true, params });
+};
+export const searchMovieApi = (params: object) => {
+  const url = "/v1/movie/search-movie";
+  return UseGet({ url, requiredToken: true, params });
+};
+export const listAllMovieApi = (params) => {
+  const url = "/v1/movie/list-client";
+  return UseGet({ url, requiredToken: true, params });
 };

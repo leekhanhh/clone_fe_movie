@@ -30,7 +30,7 @@ const MovieList = (props: MovieListProps) => {
           listMovieState?.map((item) => (
             // console.log(item)
             <SwiperSlide key={item.id}>
-              <MovieCard item={item} key={item.id}></MovieCard>
+              <MovieCard item={item} key={item.id} kind="default"></MovieCard>
             </SwiperSlide>
           ))}
       </Swiper>

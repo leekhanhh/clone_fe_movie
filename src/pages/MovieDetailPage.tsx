@@ -15,16 +15,12 @@ const MovieDetailPage = (props) => {
     queryKey: ["movieDetail", id],
     queryFn: () =>
       getMovieDetailClientApi(id).then((res) => {
-        console.log(res.data);
         return res.data;
       }),
   });
-  console.log(movieDetail);
-
-  console.log(id);
 
   return (
-    <div className="py-10">
+    <div className="flex flex-col gap-8 py-10">
       <div className="w-full h-[600px] relative">
         <div className="absolute inset-0 bg-black bg-opacity-70"></div>
         <div
@@ -65,7 +61,7 @@ const MovieDetailPage = (props) => {
         {movieDetail?.overview}
       </p>
       <MovieCredit></MovieCredit>
-      {/* <MovieVideos></MovieVideos> */}
+      <MovieVideos></MovieVideos>
       {/* <SimilarMovies></SimilarMovies> */}
       <div className="flex flex-col">
         <p className="mb-10 text-3xl font-bold text-center text-white ">

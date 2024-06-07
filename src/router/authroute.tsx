@@ -15,7 +15,7 @@ export default function init(routes: object[]) {
       },
       {
         index: true,
-        path: "login",
+        // path: "login",
         element: <SignInPage />,
       },
     ],

@@ -1,14 +1,63 @@
-import React from "react";
 import { useNavigate } from "react-router";
+import FavouriteIcon from "../../shared/icons/FavouriteIcon";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  createFavoriteMovieApi,
+  deleteFavoriteMovieApi,
+} from "../../apis/favorite";
 interface MovieCardProps {
   item: object;
   key: string;
+  kind: string;
 }
 const MovieCard = (props: MovieCardProps) => {
   const navigate = useNavigate();
-  console.log(props.item);
+  const queryClient = useQueryClient();
+  const accounrtProfile = JSON.parse(
+    localStorage.getItem("AccountProfile") as string
+  );
+  const [color, setColor] = useState(
+    props.kind === "favourite" ? "#FF0000" : "#fff"
+  );
+  const { mutateAsync: createFavouriteMovie } = useMutation({
+    mutationKey: ["createFavorite"],
+    mutationFn: createFavoriteMovieApi,
+    onSuccess: (data) => {
+      setColor("#FF0000");
+      if (props.kind === "favourite") {
+        queryClient.invalidateQueries(["listFavoriteMovie"]);
+      }
+    },
+  });
+  const { mutateAsync: deleteFavouriteMovie } = useMutation({
+    mutationKey: ["deleteFavorite"],
+    mutationFn: deleteFavoriteMovieApi,
+    onSuccess: (data) => {
+      setColor("#000");
+      if (props.kind === "favourite") {
+        queryClient.invalidateQueries(["listFavoriteMovie"]);
+      }
+    },
+  });
+  const handleReactMovie = () => {
+    if (props.kind === "favourite") {
+      deleteFavouriteMovie(props.item.listFavouriteMovieId);
+    } else {
+      createFavouriteMovie({
+        accountId: accounrtProfile.account.id,
+        movieId: props.item.id,
+      });
+    }
+  };
   return (
-    <div className="flex flex-col h-full p-3 text-white rounded-lg select-none movie-card bg-slate-800">
+    <div className="relative flex flex-col h-full p-3 text-white rounded-lg select-none movie-card bg-slate-800">
+      <div
+        className="absolute cursor-pointer top-2 right-2 hover:opacity-50"
+        onClick={() => handleReactMovie()}
+      >
+        <FavouriteIcon width={30} height={30} color={color} />
+      </div>
       <img
         src={`https://image.tmdb.org/t/p/w500/${props?.item?.imagePath}`}
         alt=""
@@ -20,7 +69,6 @@ const MovieCard = (props: MovieCardProps) => {
           <span>{props.item.category.name}</span>
           <span>{props.item.vote_average}</span>
         </div>
-
         <button
           onClick={() => navigate(`/movie/${props.item.id}`)}
           className="w-full px-6 py-3 mt-auto capitalize rounded-lg bg-primary"

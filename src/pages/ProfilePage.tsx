@@ -1,19 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
-
 import EditIcon from "../shared/icons/EditIcon";
 import dayjs from "dayjs";
 import Modal from "react-modal";
 import CloseIcon from "../shared/icons/CloseIcon";
-import { getUserProfileApi } from "../apis/userprofile";
+import { getUserProfileApi, updateProfileApi } from "../apis/userprofile";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import ListFavoriteMovie from "../components/movie/ListFavoriteMovie";
+import { uploadImageApi } from "../apis/file";
+import { Button, Upload, message } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 
 dayjs.extend(customParseFormat);
 const customStyles = {
   overlay: {
     backgroundColor: "rgba(0,0,0,0.5)",
+    zIndex: 1000,
   },
   content: {
     top: "50%",
@@ -22,10 +25,13 @@ const customStyles = {
     bottom: "auto",
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
+    zIndex: 1000,
   },
 };
 const ProfilePage = () => {
   const { id } = useParams();
+  const [imgComunity, setImgComunity] = useState(null);
+  const queryClient = useQueryClient();
   const { data: userProfile } = useQuery({
     queryKey: ["profile", id],
     queryFn: () =>
@@ -33,8 +39,39 @@ const ProfilePage = () => {
         return res.data;
       }),
   });
-
+  const { mutateAsync: uploadImage, isPending: isLoadingUploadImage } =
+    useMutation({
+      mutationKey: ["uploadImage"],
+      mutationFn: uploadImageApi,
+      onSuccess: (res) => {
+        setImgComunity(res.data.filePath);
+      },
+    });
+  const { mutateAsync: updateProfile } = useMutation({
+    mutationKey: ["editProfile"],
+    mutationFn: updateProfileApi,
+  });
   const [modalIsOpen, setIsOpen] = useState(false);
+  const handleUpdateProfile = (e) => {
+    e.preventDefault();
+    // console.log(e.target.elements.)
+
+    const tempData = {
+      fullname: e.target.elements["fullname"].value,
+      email: e.target.elements["email"].value,
+      phone: e.target.elements["phone"].value,
+      gender: parseInt(e.target.elements["gender"].value),
+      dateOfBirth: dayjs(e.target.elements["dob"].value).format(
+        "DD/MM/YYYY HH:mm:ss"
+      ),
+      id: id,
+    };
+    updateProfile(tempData).then((res) => {
+      message.success("Update profile success");
+      queryClient.invalidateQueries(["profile", id]);
+      setIsOpen(false);
+    });
+  };
 
   function openModal() {
     setIsOpen(true);
@@ -50,7 +87,7 @@ const ProfilePage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-screen gap-7">
-      <div className="bg-white w-[800px] h-[600px] flex flex-row  px-2 py-3 rounded-xl ">
+      <div className="bg-white w-[800px] h-[400px] flex flex-row  px-2 py-3 rounded-xl ">
         <div className="flex flex-col gap-3 items-center justify-center border-r px-4 border-[#ccc] w-max">
           <div className="w-20 h-20 rounded-full  border border-[#ccc]">
             <img
@@ -62,9 +99,27 @@ const ProfilePage = () => {
               className="object-scale-down w-full h-full rounded-full"
             />
           </div>
-          <div className=" w-max bg-[#5d5caf] px-2 py-1 rounded-lg hover:text-white cursor-pointer">
+          {/* <div className=" w-max bg-[#5d5caf] px-2 py-1 rounded-lg hover:text-white cursor-pointer">
             Change avatar
-          </div>
+          </div> */}
+          <Upload
+            action={(file) => {
+              uploadImage({ file: file, type: "avatar" }).then((res) => {
+                updateProfile({
+                  id: id,
+                  avatarPath: res.data.filePath,
+                }).then(() => {
+                  queryClient.invalidateQueries(["profile", id]);
+                });
+              });
+            }}
+            showUploadList={false}
+          >
+            <Button icon={<UploadOutlined />} loading={isLoadingUploadImage}>
+              {/* {check === 1 ? "Click to Upload" : "Update Image"} */}
+              Click to Upload
+            </Button>
+          </Upload>
         </div>
         <div className="flex flex-col w-full gap-8 pl-3">
           <div className="flex flex-row justify-between border-b border-[#ccc] pb-3">
@@ -80,7 +135,7 @@ const ProfilePage = () => {
           <div className="flex flex-col gap-2">
             <div className="flex flex-row gap-2">
               <p className="font-semibold ">Name:</p>
-              <p>{userProfile?.account?.username}</p>
+              <p>{userProfile?.account?.fullname}</p>
             </div>
             <div className="flex flex-row gap-2">
               <p className="font-semibold ">Email:</p>
@@ -97,9 +152,12 @@ const ProfilePage = () => {
             <div className="flex flex-row gap-2">
               <p className="font-semibold ">Date of birth:</p>
               <p>
-                {dayjs(userProfile?.dateOfBirth, "DD/MM/YYYY H:mm:ss").format(
-                  "DD/MM/YYYY"
-                )}
+                {userProfile?.dateOfBirth === null
+                  ? "not yet"
+                  : dayjs(
+                      userProfile?.dateOfBirth,
+                      "DD/MM/YYYY H:mm:ss"
+                    ).format("DD/MM/YYYY")}
               </p>
             </div>
           </div>
@@ -129,30 +187,33 @@ const ProfilePage = () => {
             </div>
           </div>
           <div className="">
-            <form action="">
+            <form action="" onSubmit={(e) => handleUpdateProfile(e)}>
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1">
                   <label htmlFor="">Name</label>
                   <input
                     type="text"
+                    id="fullname"
                     className="border border-[#ccc] rounded-lg p-2"
-                    value={userProfile?.account?.username}
+                    defaultValue={userProfile?.account?.fullname}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
                   <label htmlFor="">Email</label>
                   <input
                     type="text"
+                    id="email"
                     className="border border-[#ccc] rounded-lg p-2"
-                    value={userProfile?.account?.email}
+                    defaultValue={userProfile?.account?.email}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
                   <label htmlFor="">Phone</label>
                   <input
-                    type="text"
+                    type="number"
+                    id="phone"
                     className="border border-[#ccc] rounded-lg p-2"
-                    value={userProfile?.account?.phone}
+                    defaultValue={userProfile?.account?.phone}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -181,6 +242,7 @@ const ProfilePage = () => {
                   <label htmlFor="">date of Birth</label>
                   <input
                     type="date"
+                    id="dob"
                     className="border border-[#ccc] rounded-lg p-2"
                     defaultValue={dayjs(
                       userProfile?.dateOfBirth,
@@ -188,6 +250,11 @@ const ProfilePage = () => {
                     ).format("YYYY-MM-DD")}
                   />
                 </div>
+              </div>
+              <div className="flex flex-col gap-1 mt-4">
+                <button className="bg-[#333] text-white p-2 rounded-lg hover:bg-slate-500">
+                  save
+                </button>
               </div>
             </form>
           </div>
