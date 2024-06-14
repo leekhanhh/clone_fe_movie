@@ -4,10 +4,11 @@ import MovieVideos from "../components/movie/MovieVideos";
 import SimilarMovies from "../components/movie/SimilarMovies";
 
 import { useParams } from "react-router";
-
 import { useQuery } from "@tanstack/react-query";
 import { getMovieDetailClientApi } from "../apis/movie";
 import ChatBox from "../components/chat/ChatBox";
+import { listAllEpisode } from "../apis/episode";
+import Episode from "../components/movie/Episode";
 
 const MovieDetailPage = (props) => {
   const { id } = useParams();
@@ -18,7 +19,13 @@ const MovieDetailPage = (props) => {
         return res.data;
       }),
   });
-
+  const { data: listEpisode } = useQuery({
+    queryKey: ["listEpisode", id],
+    queryFn: () =>
+      listAllEpisode({ movieId: id }).then((res) => {
+        return res.data;
+      }),
+  });
   return (
     <div className="flex flex-col gap-8 py-10">
       <div className="w-full h-[600px] relative">
@@ -62,6 +69,13 @@ const MovieDetailPage = (props) => {
       </p>
       <MovieCredit></MovieCredit>
       <MovieVideos linkvideo={movieDetail?.videoGridFs}></MovieVideos>
+      <div className="flex flex-row items-center gap-4">
+        <div className="text-xl text-white">Chapter:</div>
+        {listEpisode?.totalElements > 0 &&
+          listEpisode.content.map((item) => {
+            return <Episode number={item.episodeNumber} />;
+          })}
+      </div>
       {/* <SimilarMovies></SimilarMovies> */}
       <div className="flex flex-col">
         <p className="mb-10 text-3xl font-bold text-center text-white ">
