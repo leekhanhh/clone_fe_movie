@@ -1,16 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import MovieCredit from "../components/movie/MovieCredit";
 import MovieVideos from "../components/movie/MovieVideos";
 import SimilarMovies from "../components/movie/SimilarMovies";
 
 import { useParams } from "react-router";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMovieDetailClientApi } from "../apis/movie";
 import ChatBox from "../components/chat/ChatBox";
+import {
+  LikeFilled,
+  LikeOutlined,
+  LikeTwoTone,
+  StarTwoTone,
+} from "@ant-design/icons";
+import {
+  createVoteMovieApi,
+  deleteVoteMovieApi,
+  getListVoteMovieApi,
+  getUserVoteMovieApi,
+} from "../apis/vote";
+import { Flex, Rate } from "antd";
+import {
+  createRatingMovieApi,
+  getRatingScoreMovieApi,
+  getUserRatingMovieApi,
+} from "../apis/rating";
 
 const MovieDetailPage = (props) => {
+  const [value, setValue] = useState(5);
+  const [viewValue, setViewValue] = useState(true);
+
   const { id } = useParams();
+  const queryClient = useQueryClient();
+  const desc = ["terrible", "bad", "normal", "good", "wonderful"];
+  const accountProfile = JSON.parse(
+    localStorage.getItem("AccountProfile") as string
+  );
+  const accountId = accountProfile.account.id;
+  console.log(accountId);
   const { data: movieDetail } = useQuery({
     queryKey: ["movieDetail", id],
     queryFn: () =>
@@ -18,7 +46,80 @@ const MovieDetailPage = (props) => {
         return res.data;
       }),
   });
+  const { data: countVote } = useQuery({
+    queryKey: ["countVote", id],
+    queryFn: () =>
+      getListVoteMovieApi(id).then((res) => {
+        return res?.data?.totalElements;
+      }),
+  });
+  const { data: checkVote } = useQuery({
+    queryKey: ["checkVote", id, accountId],
+    queryFn: () =>
+      getUserVoteMovieApi(id, accountId).then((res) => {
+        console.log(res?.data?.totalElements);
+        return res?.data?.totalElements;
+      }),
+  });
+  const { mutateAsync: createVoteMovie } = useMutation({
+    mutationKey: [{}, "createVoteMovie"],
+    mutationFn: createVoteMovieApi,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["checkVote"]);
+      queryClient.invalidateQueries(["countVote"]);
+    },
+  });
+  const { mutateAsync: deleteVoteMovie } = useMutation({
+    mutationKey: ["deleteVoteMovie"],
+    mutationFn: (accountId: string, id: string) =>
+      deleteVoteMovieApi(accountId, id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["checkVote"]);
+      queryClient.invalidateQueries(["countVote"]);
+    },
+  });
+  const handleVoteMovie = () => {
+    if (checkVote == 0) {
+      createVoteMovie({
+        accountId: accountId,
+        movieId: id,
+      });
+    } else {
+      deleteVoteMovie({ accountId: accountId, id: id });
+    }
+  };
 
+  const { data: checkRating } = useQuery({
+    queryKey: ["checkRating", id, accountId],
+    queryFn: () =>
+      getUserRatingMovieApi(id, accountId).then((res) => {
+        console.log(res?.data?.totalElements);
+        return res?.data?.totalElements;
+      }),
+  });
+  const { mutateAsync: createRatingMovie } = useMutation({
+    mutationKey: [{}, "createRatingMovie"],
+    mutationFn: createRatingMovieApi,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["checkRating"]);
+    },
+  });
+  const handleRatingChange = (value) => {
+    console.log("Value", value);
+    setValue(value);
+    createRatingMovie({
+      accountId: accountId,
+      movieId: id,
+      evaluation: value,
+    });
+  };
+  const { data: ratingScore } = useQuery({
+    queryKey: ["ratingScoree", id, accountId],
+    queryFn: () =>
+      getRatingScoreMovieApi(id).then((res) => {
+        return res?.data;
+      }),
+  });
   return (
     <div className="flex flex-col gap-8 py-10">
       <div className="w-full h-[600px] relative">
@@ -63,6 +164,58 @@ const MovieDetailPage = (props) => {
       <MovieCredit></MovieCredit>
       <MovieVideos linkvideo={movieDetail?.videoGridFs}></MovieVideos>
       {/* <SimilarMovies></SimilarMovies> */}
+      <div className="flex items-center justify-center w-full">
+        <div className="flex flex-col w-[1000px] h-[150px]  px-2 py-3  gap-4 rounded-md border border-[#ccc] shadow-lg bg-white">
+          <div className=" w-[100px] h-[30px] bg-blue-500 rounded-lg flex flex-row items-center justify-center gap-2">
+            {checkVote == 0 ? (
+              <button onClick={() => handleVoteMovie()}>
+                <LikeOutlined
+                  style={{
+                    fontSize: "16px",
+                    color: "#FFFF",
+                    cursor: "pointer",
+                  }}
+                />
+              </button>
+            ) : (
+              <button onClick={() => handleVoteMovie()}>
+                <LikeFilled
+                  type="message"
+                  style={{
+                    fontSize: "16px",
+                    color: "#FFFF",
+                    cursor: "pointer",
+                  }}
+                />
+              </button>
+            )}
+            <p className="text-base font-semibold text-white">
+              Like {countVote}
+            </p>
+          </div>
+          <div className="w-[800px] h-[100px] flex flex-col  ">
+            <p className="text-xl font-semibold text-black">Rate</p>
+            <p className="text-2xl font-semibold text-red-600">
+              {ratingScore}{" "}
+              <span className="text-base font-semibold text-gray-500">/5</span>
+            </p>
+            {checkRating == 0 ? (
+              <Flex gap="middle" vertical>
+                <Rate
+                  allowHalf
+                  tooltips={desc}
+                  onChange={handleRatingChange}
+                  value={value}
+                />
+              </Flex>
+            ) : (
+              <p className="text-base font-semibold text-gray-600">
+                You have already rated!
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
       <div className="flex flex-col">
         <p className="mb-10 text-3xl font-bold text-center text-white ">
           Comment

@@ -15,19 +15,15 @@ const MovieList = (props: MovieListProps) => {
     queryFn: () =>
       getListMovieClientApi(props.type).then((res) => {
         console.log(res.data.content);
-        const tempData = res.data.content.map((item: object) => {
-          return item.movie;
-        });
-        setListMovieState(tempData);
-        return res.data.content.movie;
+        return res.data.content;
       }),
   });
-
+  console.log(listMovie);
   return (
     <div className="movie-list ">
       <Swiper grabCursor={true} spaceBetween={40} slidesPerView={"auto"}>
-        {listMovieState?.length > 0 &&
-          listMovieState?.map((item) => (
+        {listMovie?.length > 0 &&
+          listMovie?.map((item) => (
             // console.log(item)
             <SwiperSlide key={item.id}>
               <MovieCard item={item} key={item.id} kind="default"></MovieCard>

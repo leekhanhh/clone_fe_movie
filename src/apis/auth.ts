@@ -2,7 +2,7 @@ import UseCallApi from "../hooks/UseCallApi";
 
 const { UsePost } = UseCallApi();
 export const loginApi = (params: object) => {
-  const url = "/auth/auth/login";
+  const url = "/auth/login";
   return UsePost({ url, params });
 };
 export const registerApi = (params: object) => {
