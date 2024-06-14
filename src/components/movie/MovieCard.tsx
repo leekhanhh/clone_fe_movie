@@ -59,7 +59,7 @@ const MovieCard = (props: MovieCardProps) => {
         <FavouriteIcon width={30} height={30} color={color} />
       </div>
       <img
-        src={`https://image.tmdb.org/t/p/w500/${props?.item?.imagePath}`}
+        src={props?.item?.imagePath}
         alt=""
         className="w-full h-[250px] object-cover rounded-lg mb-5"
       />

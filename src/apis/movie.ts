@@ -4,9 +4,11 @@ const { UseGet, UsePost, UseEdit, UseDelete } = UseCallApi();
 export const getListMovieClientApi = (type: string) => {
   let url;
   if (type === "trending") {
-    url = "/v1/vote-movie/list-vote";
-  } else if (type === "top_rated") {
     url = "/v1/rating/list-recommending-movie";
+  } else if (type === "top_rated") {
+    url = "/v1/vote-movie/list-vote-movie";
+  } else if (type === "recent") {
+    url = "/v1/watched-movie/list-watched-movie-by-accountId";
   } else {
     url = "/v1/movie/list-client";
   }
