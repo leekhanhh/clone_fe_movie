@@ -6,34 +6,38 @@ interface MovieVideosProps {
 }
 const MovieVideos = (props: MovieVideosProps) => {
   const { id } = useParams();
-
+  console.log("linkvideo", props.linkvideo);
+  // console.log("link video", props.linkvideo);
   // const videoRef = useRef(null);
   // const [blobUrl, setBlobUrl] = useState(null);
 
   // useEffect(() => {
   //   if (props.linkvideo) {
-  //     fetchVideoData(props.linkvideo);
+  //     fetchVideoData();
   //   }
   // }, [props.linkvideo]);
 
-  // const fetchVideoData = async (url) => {
+  // const fetchVideoData = async () => {
   //   try {
-  //     const response = await axios.get(url, {
-  //       responseType: 'arraybuffer'
+  //     const response = await axios.get(props.linkvideo, {
+  //       responseType: "arraybuffer",
   //     });
 
-  //     const blob = new Blob([response.data], { type: 'video/mp4' });
+  //     const blob = new Blob([response.data], { type: "video/mp4" });
   //     const url = URL.createObjectURL(blob);
   //     setBlobUrl(url);
+  //     console.log("Video fetched", url);
   //   } catch (error) {
-  //     console.error('Error fetching video', error);
+  //     console.error("Error fetching video", error);
   //   }
   // };
   return (
     <div className="flex flex-col gap-3">
       <p className="mb-10 text-3xl font-bold text-center text-white ">Films</p>
-      <video src={props.linkvideo} controls>
-        <source type="video/mp4" />
+      <video controls>
+        <source src={props.linkvideo} type="video/mp4" />
+        <source src={props.linkvideo} type="video/mkv" />
+        Your browser does not support the video tag.
       </video>
     </div>
   );

@@ -49,6 +49,7 @@ const ProfilePage = () => {
         return res.data;
       }),
   });
+
   const { mutateAsync: uploadImage, isPending: isLoadingUploadImage } =
     useMutation({
       mutationKey: ["uploadImage"],
