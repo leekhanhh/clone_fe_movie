@@ -17,7 +17,7 @@ const MovieList = (props: MovieListProps) => {
         return res.data.content;
       }),
   });
-
+  console.log(listMovie);
   return (
     <div className="movie-list ">
       <Swiper grabCursor={true} spaceBetween={40} slidesPerView={"auto"}>
