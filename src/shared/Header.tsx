@@ -23,7 +23,7 @@ const Header = () => {
       label: (
         <div
           className="flex flex-row items-center gap-2 px-2 py-1"
-          onClick={() => navigate(`/profile/${data?.data?.account?.id}`)}
+          onClick={() => navigate(`/profile/${data?.account?.id}`)}
         >
           <UserIcon />
           <p className="text-base ">Profile</p>
@@ -66,7 +66,7 @@ const Header = () => {
       >
         <div className="absolute right-0 w-10 h-10 rounded-full cursor-pointer hover:opacity-50 ">
           <img
-            src={data?.data?.account?.avatarPath}
+            src={data?.account?.avatarPath}
             alt=""
             className="object-scale-down w-full h-full rounded-full "
           />

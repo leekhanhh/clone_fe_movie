@@ -2,12 +2,22 @@ import React, { useEffect, useState } from "react";
 import MovieCredit from "../components/movie/MovieCredit";
 import MovieVideos from "../components/movie/MovieVideos";
 import SimilarMovies from "../components/movie/SimilarMovies";
-
-import { useParams } from "react-router";
-
+import { useNavigate, useParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMovieDetailClientApi } from "../apis/movie";
+import {
+  getListFavoriteMovieByAccountIdApi,
+  getMovieDetailClientApi,
+} from "../apis/movie";
 import ChatBox from "../components/chat/ChatBox";
+import { listAllEpisode } from "../apis/episode";
+import Episode from "../components/movie/Episode";
+import FavouriteIcon from "../shared/icons/FavouriteIcon";
+import {
+  createFavoriteMovieApi,
+  deleteFavoriteMovieApi,
+} from "../apis/favorite";
+import { message } from "antd";
+
 import {
   LikeFilled,
   LikeOutlined,
@@ -26,19 +36,42 @@ import {
   getRatingScoreMovieApi,
   getUserRatingMovieApi,
 } from "../apis/rating";
-
 const MovieDetailPage = (props) => {
   const [value, setValue] = useState(5);
   const [viewValue, setViewValue] = useState(true);
-
   const { id } = useParams();
-  const queryClient = useQueryClient();
-  const desc = ["terrible", "bad", "normal", "good", "wonderful"];
+  const navigate = useNavigate();
   const accountProfile = JSON.parse(
     localStorage.getItem("AccountProfile") as string
   );
+  const [checkFavourtie, setCheckFavourite] = useState(false);
+  const [idFavourite, setIdFavourite] = useState(0);
+  const [color, setColor] = useState("");
+  const queryClient = useQueryClient();
+  const { mutateAsync: createFavouriteMovie } = useMutation({
+    mutationKey: ["createFavorite"],
+    mutationFn: createFavoriteMovieApi,
+    onSuccess: (data) => {
+      setColor("#ffd405");
+
+      queryClient.invalidateQueries({ queryKey: ["listMyFavouriteMovie"] });
+      queryClient.invalidateQueries({ queryKey: ["listFavouriteMovie"] });
+    },
+  });
+  const { mutateAsync: deleteFavouriteMovie } = useMutation({
+    mutationKey: ["deleteFavorite"],
+    mutationFn: deleteFavoriteMovieApi,
+    onSuccess: (data) => {
+      setColor("#fff");
+
+      queryClient.invalidateQueries({ queryKey: ["listMyFavouriteMovie"] });
+      queryClient.invalidateQueries({ queryKey: ["listFavouriteMovie"] });
+    },
+  });
+
+  const desc = ["terrible", "bad", "normal", "good", "wonderful"];
   const accountId = accountProfile.account.id;
-  console.log(accountId);
+
   const { data: movieDetail } = useQuery({
     queryKey: ["movieDetail", id],
     queryFn: () =>
@@ -46,7 +79,31 @@ const MovieDetailPage = (props) => {
         return res.data;
       }),
   });
-  const { data: countVote } = useQuery({
+  const listFavouriteMovie = queryClient.getQueryData(["listMyFavouriteMovie"]);
+  const { data: listEpisode } = useQuery({
+    queryKey: ["listEpisode", id],
+    queryFn: () =>
+      listAllEpisode({ movieId: id }).then((res) => {
+        return res.data;
+      }),
+  });
+  const handleReactFavourite = () => {
+    if (checkFavourtie) {
+      deleteFavouriteMovie(idFavourite).then(() => {
+        setCheckFavourite(false);
+        message.success("Delete favourite success");
+      });
+    } else {
+      createFavouriteMovie({
+        accountId: accountProfile.account.id,
+        movieId: movieDetail.id,
+      }).then(() => {
+        setCheckFavourite(true);
+        message.success("Add favourite success");
+      });
+    }
+  };
+    const { data: countVote } = useQuery({
     queryKey: ["countVote", id],
     queryFn: () =>
       getListVoteMovieApi(id).then((res) => {
@@ -120,6 +177,22 @@ const MovieDetailPage = (props) => {
         return res?.data;
       }),
   });
+  useEffect(() => {
+    if (listFavouriteMovie) {
+      const check = listFavouriteMovie?.find(
+        (item) => item?.movie?.id === movieDetail?.id
+      );
+      if (check) {
+        setCheckFavourite(true);
+        setIdFavourite(check.id);
+        setColor("#ffd405");
+      } else {
+        setCheckFavourite(false);
+        setColor("#fff");
+      }
+    }
+  }, []);
+
   return (
     <div className="flex flex-col gap-8 py-10">
       <div className="w-full h-[600px] relative">
@@ -152,6 +225,9 @@ const MovieDetailPage = (props) => {
             <span
               key={item.categoryId}
               className="px-4 py-2 transition-all border rounded cursor-pointer border-primary text-primary hover:bg-primary hover:text-white"
+              onClick={() =>
+                navigate(`/movies?title=&movieGenreId=${item.categoryId}`)
+              }
             >
               {item.categoryName}
             </span>
@@ -163,6 +239,40 @@ const MovieDetailPage = (props) => {
       </p>
       <MovieCredit></MovieCredit>
       <MovieVideos linkvideo={movieDetail?.videoGridFs}></MovieVideos>
+      {/* <div
+        className="cursor-pointer hover:opacity-50 "
+        onClick={() => {
+          handleReactFavourite();
+        }}
+      >
+        <FavouriteIcon width={40} height={40} color={color} />
+      </div> */}
+      {checkFavourtie ? (
+        <div
+          className="cursor-pointer hover:opacity-50 "
+          onClick={() => {
+            handleReactFavourite();
+          }}
+        >
+          <FavouriteIcon width={40} height={40} color={"#ffd405"} />
+        </div>
+      ) : (
+        <div
+          className="cursor-pointer hover:opacity-50 "
+          onClick={() => {
+            handleReactFavourite();
+          }}
+        >
+          <FavouriteIcon width={40} height={40} color={"#fff"} />
+        </div>
+      )}
+      <div className="flex flex-row items-center gap-4">
+        <div className="text-xl text-white">Chapter:</div>
+        {listEpisode?.totalElements > 0 &&
+          listEpisode.content.map((item) => {
+            return <Episode number={item.episodeNumber} />;
+          })}
+      </div>
       {/* <SimilarMovies></SimilarMovies> */}
       <div className="flex items-center justify-center w-full">
         <div className="flex flex-col w-[1000px] h-[150px]  px-2 py-3  gap-4 rounded-md border border-[#ccc] shadow-lg bg-white">

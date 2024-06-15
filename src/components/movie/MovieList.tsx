@@ -14,7 +14,6 @@ const MovieList = (props: MovieListProps) => {
     queryKey: ["listMovie", props.type],
     queryFn: () =>
       getListMovieClientApi(props.type).then((res) => {
-        console.log(res.data.content);
         return res.data.content;
       }),
   });
@@ -26,7 +25,7 @@ const MovieList = (props: MovieListProps) => {
           listMovie?.map((item) => (
             // console.log(item)
             <SwiperSlide key={item.id}>
-              <MovieCard item={item} key={item.id} kind="default"></MovieCard>
+              <MovieCard item={item} key={item.id}></MovieCard>
             </SwiperSlide>
           ))}
       </Swiper>

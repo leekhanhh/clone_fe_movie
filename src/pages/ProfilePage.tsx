@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import EditIcon from "../shared/icons/EditIcon";
 import dayjs from "dayjs";
@@ -11,6 +11,10 @@ import ListFavoriteMovie from "../components/movie/ListFavoriteMovie";
 import { uploadImageApi } from "../apis/file";
 import { Button, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import {
+  getListFavoriteMovieByAccountIdApi,
+  getListFavouriteMovieAllApi,
+} from "../apis/movie";
 
 dayjs.extend(customParseFormat);
 const customStyles = {
@@ -31,6 +35,12 @@ const customStyles = {
 const ProfilePage = () => {
   const { id } = useParams();
   const [imgComunity, setImgComunity] = useState(null);
+  const [checkOwner, setCheckOwner] = useState(false);
+  const [listFavouriteMovieState, setListFavouriteMovieState] = useState([]); // Provide the correct type for the state variable
+  const accountProfile = JSON.parse(
+    localStorage.getItem("AccountProfile") as string
+  );
+
   const queryClient = useQueryClient();
   const { data: userProfile } = useQuery({
     queryKey: ["profile", id],
@@ -72,7 +82,17 @@ const ProfilePage = () => {
       setIsOpen(false);
     });
   };
-
+  const { data: listFavouriteMovieByAccountId } = useQuery({
+    queryKey: ["listFavouriteMovieByAccountId"],
+    queryFn: () =>
+      getListFavouriteMovieAllApi({ accountId: id }).then((res) => {
+        if (res.data.totalElements === 0) {
+          return [];
+        } else {
+          return res.data.content;
+        }
+      }),
+  });
   function openModal() {
     setIsOpen(true);
   }
@@ -84,7 +104,11 @@ const ProfilePage = () => {
   function closeModal() {
     setIsOpen(false);
   }
-
+  useEffect(() => {
+    if (accountProfile.account.id === parseInt(id)) {
+      setCheckOwner(true);
+    }
+  }, [id]);
   return (
     <div className="flex flex-col items-center justify-center w-full h-screen gap-7">
       <div className="bg-white w-[800px] h-[400px] flex flex-row  px-2 py-3 rounded-xl ">
@@ -115,21 +139,25 @@ const ProfilePage = () => {
             }}
             showUploadList={false}
           >
-            <Button icon={<UploadOutlined />} loading={isLoadingUploadImage}>
-              {/* {check === 1 ? "Click to Upload" : "Update Image"} */}
-              Click to Upload
-            </Button>
+            {checkOwner && (
+              <Button icon={<UploadOutlined />} loading={isLoadingUploadImage}>
+                {/* {check === 1 ? "Click to Upload" : "Update Image"} */}
+                Click to Upload
+              </Button>
+            )}
           </Upload>
         </div>
         <div className="flex flex-col w-full gap-8 pl-3">
           <div className="flex flex-row justify-between border-b border-[#ccc] pb-3">
             <p className=" text-3xl font-medium text-[#5d5caf]">Profile</p>
-            <div
-              className="flex items-center cursor-pointer hover:opacity-50"
-              onClick={() => openModal()}
-            >
-              <EditIcon />
-            </div>
+            {checkOwner && (
+              <div
+                className="flex items-center cursor-pointer hover:opacity-50"
+                onClick={() => openModal()}
+              >
+                <EditIcon />
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -166,7 +194,10 @@ const ProfilePage = () => {
       <div className="flex flex-col items-center justify-center w-full gap-7">
         <p className="text-5xl font-medium text-white">Favourite Movies</p>
 
-        <ListFavoriteMovie />
+        <ListFavoriteMovie
+          owner={checkOwner}
+          listFavoriteMovie={listFavouriteMovieByAccountId}
+        />
       </div>
 
       <Modal

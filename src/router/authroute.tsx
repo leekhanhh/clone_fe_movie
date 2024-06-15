@@ -1,5 +1,6 @@
 import AuthLayout from "../layouts/AuthLayout";
 import ErrorPage from "../pages/ErrorPage";
+import ForgotPage from "../pages/ForgotPage";
 import SignInPage from "../pages/SignInPage";
 import SignUpPage from "../pages/SignUpPage";
 
@@ -10,13 +11,17 @@ export default function init(routes: object[]) {
     errorElement: <ErrorPage />,
     children: [
       {
+        index: true,
+        // path: "login",
+        element: <SignInPage />,
+      },
+      {
         path: "signup",
         element: <SignUpPage />,
       },
       {
-        index: true,
-        // path: "login",
-        element: <SignInPage />,
+        path: "forgotpassword",
+        element: <ForgotPage />,
       },
     ],
   };

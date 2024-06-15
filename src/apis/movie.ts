@@ -23,6 +23,10 @@ export const getListFavoriteMovieByAccountIdApi = (params) => {
   const url = `v1/favorite-list/list-movie-by-accountId`;
   return UseGet({ url, requiredToken: true, params });
 };
+export const getListFavouriteMovieAllApi = (params) => {
+  const url = `/v1/favorite-list/list`;
+  return UseGet({ url, requiredToken: true, params });
+};
 export const searchMovieApi = (params: object) => {
   const url = "/v1/movie/search-movie";
   return UseGet({ url, requiredToken: true, params });
