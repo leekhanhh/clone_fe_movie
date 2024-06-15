@@ -77,7 +77,10 @@ const SignInPage = (props) => {
           >
             Create an account
           </p>
-          <p className="text-sm cursor-pointer opacity-40 hover:text-blue-400">
+          <p
+            className="text-sm cursor-pointer opacity-40 hover:text-blue-400"
+            onClick={() => navigate("/forgotpassword")}
+          >
             Forgot password
           </p>
         </div>

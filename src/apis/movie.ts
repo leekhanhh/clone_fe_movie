@@ -4,9 +4,11 @@ const { UseGet, UsePost, UseEdit, UseDelete } = UseCallApi();
 export const getListMovieClientApi = (type: string) => {
   let url;
   if (type === "trending") {
-    url = "/v1/vote-movie/list-vote";
-  } else if (type === "top_rated") {
     url = "/v1/rating/list-recommending-movie";
+  } else if (type === "top_rated") {
+    url = "/v1/vote-movie/list-vote-movie";
+  } else if (type === "recent") {
+    url = "/v1/watched-movie/list-watched-movie-by-accountId";
   } else {
     url = "/v1/movie/list-client";
   }
@@ -19,6 +21,10 @@ export const getMovieDetailClientApi = (param: string) => {
 };
 export const getListFavoriteMovieByAccountIdApi = (params) => {
   const url = `v1/favorite-list/list-movie-by-accountId`;
+  return UseGet({ url, requiredToken: true, params });
+};
+export const getListFavouriteMovieAllApi = (params) => {
+  const url = `/v1/favorite-list/list`;
   return UseGet({ url, requiredToken: true, params });
 };
 export const searchMovieApi = (params: object) => {

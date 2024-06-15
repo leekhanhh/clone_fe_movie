@@ -128,7 +128,7 @@ const CommentItem = (props: CommentItemProps) => {
     <div className="flex flex-row gap-2 border-b border-[#ccc] py-2 ">
       <div
         className="cursor-pointer "
-        onClick={() => navigate(`profile/${props.accountId}`)}
+        onClick={() => navigate(`/profile/${props.accountId}`)}
       >
         <img
           src={props.avatarPath}
