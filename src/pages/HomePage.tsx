@@ -1,8 +1,6 @@
 import React, { Fragment } from "react";
 import Banner from "../shared/Banner";
 import MovieList from "../components/movie/MovieList";
-import { useQuery } from "@tanstack/react-query";
-import { getListFavoriteMovieByAccountIdApi } from "../apis/movie";
 
 interface HomePageProps {}
 const HomePage = (props: HomePageProps) => {
@@ -10,20 +8,7 @@ const HomePage = (props: HomePageProps) => {
     localStorage.getItem("AccountProfile") as string
   );
   console.log(accountProfile);
-  const { data: listFavouriteMovie } = useQuery({
-    queryKey: ["listMyFavouriteMovie"],
-    queryFn: () =>
-      getListFavoriteMovieByAccountIdApi({
-        accountId: accountProfile.account.id,
-      }).then((res) => {
-        console.log(res);
-        if (res.data.totalElements === 0) {
-          return [];
-        } else {
-          return res.data.content;
-        }
-      }),
-  });
+
   return (
     <div className="">
       <Banner />

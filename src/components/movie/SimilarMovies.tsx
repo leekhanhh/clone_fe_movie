@@ -1,20 +1,31 @@
 import React from "react";
 import { useParams } from "react-router";
-import useSWR from "swr";
-import { apiKey, fetcher } from "../../config";
 import { SwiperSlide, Swiper } from "swiper/react";
 import MovieCard from "./MovieCard";
-
-const SimilarMovies = () => {
+import { useQuery } from "@tanstack/react-query";
+import { listAllMovieApi } from "../../apis/movie";
+interface SimilarMoviesProps {
+  genreId: number;
+}
+const SimilarMovies = (props: SimilarMoviesProps) => {
   const { id } = useParams();
-  const { data, error } = useSWR(
-    `https://api.themoviedb.org/3/movie/${id}/similar?api_key=${apiKey}`,
-    fetcher
-  );
-  if (!data) return null;
+  const { data: listSimilarMovie } = useQuery({
+    queryKey: ["similarMovies", id, props.genreId],
+    queryFn: () =>
+      listAllMovieApi({ movieGenreId: props.genreId }).then((res) => {
+        if (res.data.totalElements > 0) {
+          const tempdata = res.data.content.filter(
+            (item) => item.id !== parseInt(id)
+          );
+          return tempdata;
+        } else {
+          return [];
+        }
+      }),
+  });
+
   // console.log("file: MovieDetailsPage.jsx:134 🌇 SimilarMovie 🌇 data:", data);
-  const { results } = data;
-  if (!results || results.length < 0) return null;
+
   return (
     <div className="py-10">
       <h2 className="text-center text-3xl mb-10 font-bold text-white">
@@ -22,8 +33,8 @@ const SimilarMovies = () => {
       </h2>
       <div className="movie-list">
         <Swiper grabCursor={true} spaceBetween={40} slidesPerView={"auto"}>
-          {results.length > 0 &&
-            results.map((item: object) => (
+          {listSimilarMovie?.length > 0 &&
+            listSimilarMovie.map((item: object) => (
               <SwiperSlide key={item.id}>
                 <MovieCard item={item} key={item.id}></MovieCard>
               </SwiperSlide>
