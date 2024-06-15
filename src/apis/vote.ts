@@ -10,6 +10,7 @@ export const deleteVoteMovieApi = (param: string) => {
   return UseDelete({ url, requiredToken: true });
 };
 export const getListVoteMovieApi = (param: string) => {
+  console.log(param);
   const url = `/v1/vote-movie/list-vote?movieId=${param}`;
   return UseGet({ url, requiredToken: true });
 };

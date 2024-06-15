@@ -5,7 +5,7 @@ import SimilarMovies from "../components/movie/SimilarMovies";
 import { useNavigate, useParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  getListFavoriteMovieByAccountIdApi,
+  getListFavouriteMovieAllApi,
   getMovieDetailClientApi,
 } from "../apis/movie";
 import ChatBox from "../components/chat/ChatBox";
@@ -45,27 +45,25 @@ const MovieDetailPage = (props) => {
     localStorage.getItem("AccountProfile") as string
   );
   const [checkFavourtie, setCheckFavourite] = useState(false);
-  const [idFavourite, setIdFavourite] = useState(0);
-  const [color, setColor] = useState("");
   const queryClient = useQueryClient();
   const { mutateAsync: createFavouriteMovie } = useMutation({
     mutationKey: ["createFavorite"],
     mutationFn: createFavoriteMovieApi,
     onSuccess: (data) => {
-      setColor("#ffd405");
-
-      queryClient.invalidateQueries({ queryKey: ["listMyFavouriteMovie"] });
-      queryClient.invalidateQueries({ queryKey: ["listFavouriteMovie"] });
+      queryClient.invalidateQueries({
+        queryKey: ["listFavouriteMovieByAccountId "],
+      });
+      queryClient.invalidateQueries({ queryKey: ["CheckFavouriteMovie"] });
     },
   });
   const { mutateAsync: deleteFavouriteMovie } = useMutation({
     mutationKey: ["deleteFavorite"],
     mutationFn: deleteFavoriteMovieApi,
     onSuccess: (data) => {
-      setColor("#fff");
-
-      queryClient.invalidateQueries({ queryKey: ["listMyFavouriteMovie"] });
-      queryClient.invalidateQueries({ queryKey: ["listFavouriteMovie"] });
+      queryClient.invalidateQueries({
+        queryKey: ["listFavouriteMovieByAccountId "],
+      });
+      queryClient.invalidateQueries({ queryKey: ["CheckFavouriteMovie"] });
     },
   });
 
@@ -79,7 +77,21 @@ const MovieDetailPage = (props) => {
         return res.data;
       }),
   });
-  const listFavouriteMovie = queryClient.getQueryData(["listMyFavouriteMovie"]);
+  const { data: favouriteMovie } = useQuery({
+    queryKey: ["CheckFavouriteMovie"],
+    queryFn: () =>
+      getListFavouriteMovieAllApi({ accountId: accountId, movieId: id }).then(
+        (res) => {
+          if (res.data.totalElements > 0) {
+            setCheckFavourite(true);
+            return res.data.content;
+          } else {
+            return [];
+          }
+        }
+      ),
+  });
+
   const { data: listEpisode } = useQuery({
     queryKey: ["listEpisode", id],
     queryFn: () =>
@@ -87,23 +99,8 @@ const MovieDetailPage = (props) => {
         return res.data;
       }),
   });
-  const handleReactFavourite = () => {
-    if (checkFavourtie) {
-      deleteFavouriteMovie(idFavourite).then(() => {
-        setCheckFavourite(false);
-        message.success("Delete favourite success");
-      });
-    } else {
-      createFavouriteMovie({
-        accountId: accountProfile.account.id,
-        movieId: movieDetail.id,
-      }).then(() => {
-        setCheckFavourite(true);
-        message.success("Add favourite success");
-      });
-    }
-  };
-    const { data: countVote } = useQuery({
+
+  const { data: countVote } = useQuery({
     queryKey: ["countVote", id],
     queryFn: () =>
       getListVoteMovieApi(id).then((res) => {
@@ -150,7 +147,6 @@ const MovieDetailPage = (props) => {
     queryKey: ["checkRating", id, accountId],
     queryFn: () =>
       getUserRatingMovieApi(id, accountId).then((res) => {
-        console.log(res?.data?.totalElements);
         return res?.data?.totalElements;
       }),
   });
@@ -162,7 +158,6 @@ const MovieDetailPage = (props) => {
     },
   });
   const handleRatingChange = (value) => {
-    console.log("Value", value);
     setValue(value);
     createRatingMovie({
       accountId: accountId,
@@ -177,21 +172,6 @@ const MovieDetailPage = (props) => {
         return res?.data;
       }),
   });
-  useEffect(() => {
-    if (listFavouriteMovie) {
-      const check = listFavouriteMovie?.find(
-        (item) => item?.movie?.id === movieDetail?.id
-      );
-      if (check) {
-        setCheckFavourite(true);
-        setIdFavourite(check.id);
-        setColor("#ffd405");
-      } else {
-        setCheckFavourite(false);
-        setColor("#fff");
-      }
-    }
-  }, []);
 
   return (
     <div className="flex flex-col gap-8 py-10">
@@ -239,33 +219,7 @@ const MovieDetailPage = (props) => {
       </p>
       <MovieCredit></MovieCredit>
       <MovieVideos linkvideo={movieDetail?.videoGridFs}></MovieVideos>
-      {/* <div
-        className="cursor-pointer hover:opacity-50 "
-        onClick={() => {
-          handleReactFavourite();
-        }}
-      >
-        <FavouriteIcon width={40} height={40} color={color} />
-      </div> */}
-      {checkFavourtie ? (
-        <div
-          className="cursor-pointer hover:opacity-50 "
-          onClick={() => {
-            handleReactFavourite();
-          }}
-        >
-          <FavouriteIcon width={40} height={40} color={"#ffd405"} />
-        </div>
-      ) : (
-        <div
-          className="cursor-pointer hover:opacity-50 "
-          onClick={() => {
-            handleReactFavourite();
-          }}
-        >
-          <FavouriteIcon width={40} height={40} color={"#fff"} />
-        </div>
-      )}
+
       <div className="flex flex-row items-center gap-4">
         <div className="text-xl text-white">Chapter:</div>
         {listEpisode?.totalElements > 0 &&
@@ -273,36 +227,69 @@ const MovieDetailPage = (props) => {
             return <Episode number={item.episodeNumber} />;
           })}
       </div>
-      {/* <SimilarMovies></SimilarMovies> */}
+      <SimilarMovies
+        genreId={movieDetail?.genres[0]?.categoryId}
+      ></SimilarMovies>
       <div className="flex items-center justify-center w-full">
         <div className="flex flex-col w-[1000px] h-[150px]  px-2 py-3  gap-4 rounded-md border border-[#ccc] shadow-lg bg-white">
-          <div className=" w-[100px] h-[30px] bg-blue-500 rounded-lg flex flex-row items-center justify-center gap-2">
-            {checkVote == 0 ? (
-              <button onClick={() => handleVoteMovie()}>
-                <LikeOutlined
-                  style={{
-                    fontSize: "16px",
-                    color: "#FFFF",
-                    cursor: "pointer",
-                  }}
-                />
-              </button>
+          <div className="flex flex-row justify-between items-center">
+            <div className=" w-[100px] h-[30px] bg-blue-500 rounded-lg flex flex-row items-center justify-center gap-2">
+              {checkVote == 0 ? (
+                <button onClick={() => handleVoteMovie()}>
+                  <LikeOutlined
+                    style={{
+                      fontSize: "16px",
+                      color: "#FFFF",
+                      cursor: "pointer",
+                    }}
+                  />
+                </button>
+              ) : (
+                <button onClick={() => handleVoteMovie()}>
+                  <LikeFilled
+                    type="message"
+                    style={{
+                      fontSize: "16px",
+                      color: "#FFFF",
+                      cursor: "pointer",
+                    }}
+                  />
+                </button>
+              )}
+              <p className="text-base font-semibold text-white">
+                Like {countVote}
+              </p>
+            </div>
+            {checkFavourtie ? (
+              <div
+                className="cursor-pointer hover:opacity-50 bg-blue-500 w-10 h-10 flex justify-center items-center rounded-full "
+                onClick={() => {
+                  deleteFavouriteMovie(favouriteMovie[0].id).then(() => {
+                    setCheckFavourite(false);
+                    message.success("Delete favourite success");
+                  });
+                }}
+              >
+                <FavouriteIcon width={20} height={20} color={"#ffd405"} />
+              </div>
             ) : (
-              <button onClick={() => handleVoteMovie()}>
-                <LikeFilled
-                  type="message"
-                  style={{
-                    fontSize: "16px",
-                    color: "#FFFF",
-                    cursor: "pointer",
-                  }}
-                />
-              </button>
+              <div
+                className="cursor-pointer hover:opacity-50 bg-blue-500 w-10 h-10 flex justify-center items-center rounded-full"
+                onClick={() => {
+                  createFavouriteMovie({
+                    accountId: accountProfile.account.id,
+                    movieId: movieDetail.id,
+                  }).then(() => {
+                    setCheckFavourite(true);
+                    message.success("Add favourite success");
+                  });
+                }}
+              >
+                <FavouriteIcon width={20} height={20} color={"#fff"} />
+              </div>
             )}
-            <p className="text-base font-semibold text-white">
-              Like {countVote}
-            </p>
           </div>
+
           <div className="w-[800px] h-[100px] flex flex-col  ">
             <p className="text-xl font-semibold text-black">Rate</p>
             <p className="text-2xl font-semibold text-red-600">

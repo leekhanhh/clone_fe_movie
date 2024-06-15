@@ -13,7 +13,7 @@ const ListComment = () => {
         return res.data.content;
       }),
   });
-  console.log(listComment);
+
   return (
     <div className="flex flex-col gap-2 mt-4 max-h-[500px] overflow-y-scroll ">
       {listComment === undefined ? (

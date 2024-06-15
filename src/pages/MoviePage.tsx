@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import MovieCard from "../components/movie/MovieCard";
 import useDebounce from "../hooks/useDebounce";
 import { useQuery } from "@tanstack/react-query";
-import { listAllMovieApi, searchMovieApi } from "../apis/movie";
+import { listAllMovieApi } from "../apis/movie";
 import { useSearchParams } from "react-router-dom";
 import { listAllCategoryApi } from "../apis/category";
 import Category from "../components/category/Category";
@@ -21,7 +21,11 @@ const MoviePage = () => {
     queryKey: ["listMovie", queryParam],
     queryFn: () =>
       listAllMovieApi(queryParam).then((res) => {
-        return res.data.content;
+        if (res.data.totalElements > 0) {
+          return res.data.content;
+        } else {
+          return [];
+        }
       }),
   });
   const { data: listCategory } = useQuery({
