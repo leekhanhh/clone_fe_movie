@@ -44,9 +44,6 @@ const MoviePage = () => {
       // setSearchParams({ title: e.target.value });
     }
   };
-  // const { data, error } = useSWR(url, fetcher);
-  // const loading = !data && !error;
-
   const loadpage = (operator: string) => {
     if (operator === "prev") {
       setNextPage(nextPage - 1);
@@ -54,23 +51,6 @@ const MoviePage = () => {
       setNextPage(nextPage + 1);
     }
   };
-
-  // useEffect(() => {
-  //   if (filterDebounce) {
-  //     setUrl(
-  //       `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${filterDebounce}&page=${nextPage}`
-  //     );
-  //   } else {
-  //     setUrl(
-  //       `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&page=${nextPage}`
-  //     );
-  //   }
-  // }, [filterDebounce, nextPage]);
-
-  // if (!data) {
-  //   return null;
-  // }
-  // const movies = data?.results || [];
   useEffect(() => {
     setSearchParams(queryParam);
     categoryType === "" ? setActive(true) : setActive(false);

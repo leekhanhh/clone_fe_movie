@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import MovieCredit from "../components/movie/MovieCredit";
 import MovieVideos from "../components/movie/MovieVideos";
 import SimilarMovies from "../components/movie/SimilarMovies";
@@ -36,9 +36,13 @@ import {
   getRatingScoreMovieApi,
   getUserRatingMovieApi,
 } from "../apis/rating";
+import { useSearchParams } from "react-router-dom";
 const MovieDetailPage = (props) => {
   const [value, setValue] = useState(5);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [viewValue, setViewValue] = useState(true);
+  const [linkVideo, setLinkVideo] = useState("");
+  const [episode, setEpisode] = useState(1);
   const { id } = useParams();
   const navigate = useNavigate();
   const accountProfile = JSON.parse(
@@ -74,6 +78,12 @@ const MovieDetailPage = (props) => {
     queryKey: ["movieDetail", id],
     queryFn: () =>
       getMovieDetailClientApi(id).then((res) => {
+        console.log(res.data);
+        if (res.data.category.id === 2) {
+          setLinkVideo(res.data.videoGridFs);
+        } else {
+          setLinkVideo(res.data.episodes[0].url);
+        }
         return res.data;
       }),
   });
@@ -172,7 +182,16 @@ const MovieDetailPage = (props) => {
         return res?.data;
       }),
   });
-
+  const queryParam = useMemo(() => {
+    if (movieDetail?.category?.id === 1) {
+      return { episode: episode.toString() };
+    } else {
+      return {};
+    }
+  }, [episode, id, movieDetail?.category?.id]);
+  useEffect(() => {
+    setSearchParams(queryParam);
+  }, [queryParam]);
   return (
     <div className="flex flex-col gap-8 py-10">
       <div className="w-full h-[600px] relative">
@@ -218,21 +237,30 @@ const MovieDetailPage = (props) => {
         {movieDetail?.overview}
       </p>
       <MovieCredit></MovieCredit>
-      <MovieVideos linkvideo={movieDetail?.videoGridFs}></MovieVideos>
-
-      <div className="flex flex-row items-center gap-4">
-        <div className="text-xl text-white">Chapter:</div>
-        {listEpisode?.totalElements > 0 &&
-          listEpisode.content.map((item) => {
-            return <Episode number={item.episodeNumber} />;
+      <MovieVideos linkvideo={linkVideo}></MovieVideos>
+      {listEpisode?.totalElements > 0 && (
+        <div className="flex flex-row items-center gap-4">
+          <div className="text-xl text-white">Chapter:</div>
+          {listEpisode.content.map((item) => {
+            return (
+              <Episode
+                key={item.id}
+                number={item.episodeNumber}
+                url={item.url}
+                handleChooseEpisode={setEpisode}
+                handleChooseLinkvideo={setLinkVideo}
+              />
+            );
           })}
-      </div>
+        </div>
+      )}
+
       <SimilarMovies
         genreId={movieDetail?.genres[0]?.categoryId}
       ></SimilarMovies>
       <div className="flex items-center justify-center w-full">
         <div className="flex flex-col w-[1000px] h-[150px]  px-2 py-3  gap-4 rounded-md border border-[#ccc] shadow-lg bg-white">
-          <div className="flex flex-row justify-between items-center">
+          <div className="flex flex-row items-center justify-between">
             <div className=" w-[100px] h-[30px] bg-blue-500 rounded-lg flex flex-row items-center justify-center gap-2">
               {checkVote == 0 ? (
                 <button onClick={() => handleVoteMovie()}>
@@ -262,7 +290,7 @@ const MovieDetailPage = (props) => {
             </div>
             {checkFavourtie ? (
               <div
-                className="cursor-pointer hover:opacity-50 bg-blue-500 w-10 h-10 flex justify-center items-center rounded-full "
+                className="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-full cursor-pointer hover:opacity-50 "
                 onClick={() => {
                   deleteFavouriteMovie(favouriteMovie[0].id).then(() => {
                     setCheckFavourite(false);
@@ -274,7 +302,7 @@ const MovieDetailPage = (props) => {
               </div>
             ) : (
               <div
-                className="cursor-pointer hover:opacity-50 bg-blue-500 w-10 h-10 flex justify-center items-center rounded-full"
+                className="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-full cursor-pointer hover:opacity-50"
                 onClick={() => {
                   createFavouriteMovie({
                     accountId: accountProfile.account.id,
