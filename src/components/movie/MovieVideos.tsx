@@ -1,12 +1,14 @@
-import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
+
 interface MovieVideosProps {
   linkvideo?: string;
 }
 const MovieVideos = (props: MovieVideosProps) => {
   const { id } = useParams();
-  console.log("linkvideo", props.linkvideo);
+  const [linkVideoState, setLinkVideoState] = useState<string>("");
+  // console.log("linkvideo", props.linkvideo);
+
   // console.log("link video", props.linkvideo);
   // const videoRef = useRef(null);
   // const [blobUrl, setBlobUrl] = useState(null);
@@ -31,12 +33,22 @@ const MovieVideos = (props: MovieVideosProps) => {
   //     console.error("Error fetching video", error);
   //   }
   // };
+  useEffect(() => {
+    setLinkVideoState(props.linkvideo as string);
+  }, [props.linkvideo]);
+
   return (
     <div className="flex flex-col gap-3">
       <p className="mb-10 text-3xl font-bold text-center text-white ">Films</p>
-      <video controls>
-        <source src={props.linkvideo} type="video/mp4" />
-        <source src={props.linkvideo} type="video/mkv" />
+      <video controls src={linkVideoState}>
+        <source src={linkVideoState} type="video/mp4" />
+        <source src={linkVideoState} type="video/mkv" />
+        {/* <source
+          src={
+            "https://movies-website-tlcn-project.s3.ap-southeast-1.amazonaws.com/Video/1080p/fast_and_furious.mp4"
+          }
+          type="video/mp4"
+        /> */}
         Your browser does not support the video tag.
       </video>
     </div>

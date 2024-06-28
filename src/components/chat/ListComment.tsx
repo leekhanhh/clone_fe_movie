@@ -1,8 +1,12 @@
 import React from "react";
 import CommentItem from "./CommentItem";
 import { useQuery } from "@tanstack/react-query";
-import { getListCommentByIdApi } from "../../apis/review";
+import {
+  getListCommentByIdApi,
+  getListReactionByMovieIdApi,
+} from "../../apis/review";
 import { useParams } from "react-router";
+import { IdcardOutlined } from "@ant-design/icons";
 
 const ListComment = () => {
   const { id } = useParams();
@@ -13,7 +17,18 @@ const ListComment = () => {
         return res.data.content;
       }),
   });
-
+  const { data: listReactionComment } = useQuery({
+    queryKey: ["ListReactionComment", id],
+    queryFn: () =>
+      getListReactionByMovieIdApi({ movieId: id }).then((res) => {
+        console.log(res);
+        if (res.data.totalElements === 0) {
+          return [];
+        } else {
+          return res.data.content;
+        }
+      }),
+  });
   return (
     <div className="flex flex-col gap-2 mt-4 max-h-[500px] overflow-y-scroll ">
       {listComment === undefined ? (
@@ -31,6 +46,7 @@ const ListComment = () => {
               avatarPath={item.account.avatarPath}
               accountId={item.account.id}
               commentId={item.id}
+              listReactionComment={listReactionComment}
             />
           );
         })

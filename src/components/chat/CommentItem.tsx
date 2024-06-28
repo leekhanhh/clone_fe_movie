@@ -7,7 +7,12 @@ import { useNavigate, useParams } from "react-router";
 import MoreIcon from "../../shared/icons/MoreIcon";
 import { Dropdown, message } from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteCommentApi, editCommentApi } from "../../apis/review";
+import {
+  createReactionCommentApi,
+  deleteCommentApi,
+  deleteReactionCommentApi,
+  editCommentApi,
+} from "../../apis/review";
 import Modal from "react-modal";
 interface CommentItemProps {
   userName: string;
@@ -16,6 +21,7 @@ interface CommentItemProps {
   accountId: number;
   commentId: number;
   avatarPath: string;
+  listReactionComment: object[];
 }
 const customStyles = {
   overlay: {
@@ -34,6 +40,7 @@ const CommentItem = (props: CommentItemProps) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [items, setItem] = useState<object[]>([]);
+  const [check, setCheck] = useState<boolean>();
   const [editState, setEditState] = useState(false);
   const [modalIsOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -48,6 +55,7 @@ const CommentItem = (props: CommentItemProps) => {
   function closeModal() {
     setIsOpen(false);
   }
+
   const accountProfile = JSON.parse(
     localStorage.getItem("AccountProfile") as string
   );
@@ -59,6 +67,29 @@ const CommentItem = (props: CommentItemProps) => {
   const { mutateAsync: deleteComment } = useMutation({
     mutationKey: ["deleteComment", props.commentId],
     mutationFn: deleteCommentApi,
+  });
+  const { mutateAsync: createReaction } = useMutation({
+    mutationKey: ["createReactionComment"],
+    mutationFn: createReactionCommentApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ListReactionComment", id] });
+      message.success("Create reaction successfully");
+      setCheck(true);
+    },
+  });
+  const checkReaction = () => {
+    return props.listReactionComment?.find(
+      (item: object) => item.reviewId === props.commentId
+    );
+  };
+  const { mutateAsync: deleteReaction } = useMutation({
+    mutationKey: ["deleteReactionComment"],
+    mutationFn: deleteReactionCommentApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ListReactionComment", id] });
+      message.success("Delete reaction successfully");
+      setCheck(false);
+    },
   });
   const handleCheckAccount = () => {
     if (accountProfile.account.id === props.accountId) {
@@ -119,11 +150,23 @@ const CommentItem = (props: CommentItemProps) => {
       closeModal();
     });
   };
-
+  const handleReaction = () => {
+    if (check) {
+      deleteReaction(props.commentId);
+    } else {
+      createReaction({
+        reviewId: props.commentId,
+        emotion: 1,
+        accountId: accountProfile.account.id,
+      });
+    }
+  };
   useEffect(() => {
     handleCheckAccount();
   }, []);
-
+  useEffect(() => {
+    setCheck(checkReaction() === undefined ? false : true);
+  }, []);
   return (
     <div className="flex flex-row gap-2 border-b border-[#ccc] py-2 ">
       <div
@@ -171,8 +214,11 @@ const CommentItem = (props: CommentItemProps) => {
           )}
         </div>
         <div className="flex flex-row gap-2">
-          <div className="cursor-pointer hover:opacity-50">
-            <HeartIcon />
+          <div
+            className="cursor-pointer hover:opacity-50"
+            onClick={() => handleReaction()}
+          >
+            <HeartIcon color={check ? "red" : " black"} />
           </div>
           <div className="cursor-pointer hover:opacity-50">
             <CommentIcon />
