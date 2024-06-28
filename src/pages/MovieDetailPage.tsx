@@ -18,12 +18,7 @@ import {
 } from "../apis/favorite";
 import { message } from "antd";
 
-import {
-  LikeFilled,
-  LikeOutlined,
-  LikeTwoTone,
-  StarTwoTone,
-} from "@ant-design/icons";
+import { LikeFilled, LikeOutlined } from "@ant-design/icons";
 import {
   createVoteMovieApi,
   deleteVoteMovieApi,
