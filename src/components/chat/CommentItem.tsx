@@ -40,6 +40,7 @@ const CommentItem = (props: CommentItemProps) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [items, setItem] = useState<object[]>([]);
+  const [idReaction, setIdReaction] = useState<number>();
   const [check, setCheck] = useState<boolean>();
   const [editState, setEditState] = useState(false);
   const [modalIsOpen, setIsOpen] = useState(false);
@@ -82,6 +83,7 @@ const CommentItem = (props: CommentItemProps) => {
       (item: object) => item.reviewId === props.commentId
     );
   };
+  console.log(props.listReactionComment);
   const { mutateAsync: deleteReaction } = useMutation({
     mutationKey: ["deleteReactionComment"],
     mutationFn: deleteReactionCommentApi,
@@ -152,7 +154,7 @@ const CommentItem = (props: CommentItemProps) => {
   };
   const handleReaction = () => {
     if (check) {
-      deleteReaction(props.commentId);
+      deleteReaction(idReaction);
     } else {
       createReaction({
         reviewId: props.commentId,
@@ -166,6 +168,11 @@ const CommentItem = (props: CommentItemProps) => {
   }, []);
   useEffect(() => {
     setCheck(checkReaction() === undefined ? false : true);
+    props.listReactionComment?.map((item: object) => {
+      if (item.reviewId === props.commentId) {
+        setIdReaction(item.id);
+      }
+    });
   }, []);
   return (
     <div className="flex flex-row gap-2 border-b border-[#ccc] py-2 ">
