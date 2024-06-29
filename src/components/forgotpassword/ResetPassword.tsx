@@ -33,7 +33,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
     }
   };
   return (
-    <div className="">
+    <div className="h-full ">
       {success ? (
         <Result
           status="success"
