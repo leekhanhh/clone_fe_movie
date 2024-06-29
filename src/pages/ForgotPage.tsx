@@ -25,7 +25,7 @@ const ForgotPage = () => {
     }
   }
   return (
-    <div className="bg-white w-[400px] h-[300px] rounded-lg flex flex-col  px-3 pt-4 ">
+    <div className="bg-white w-[400px] h-[400px] rounded-lg flex flex-col  px-3 pt-4 ">
       <div className="flex items-center justify-center w-full border-b border-[#ccc] pb-3">
         <p className="text-3xl font-medium  text-[#0f172a]">Forgot password</p>
       </div>
