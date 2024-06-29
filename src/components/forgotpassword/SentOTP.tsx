@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import React from "react";
 import { sendOTPAPI } from "../../apis/auth";
 import { useNavigate } from "react-router";
-import { Button } from "antd";
+import { Button, message } from "antd";
 interface SentOTPProps {
   handleSetStep: (id: number) => void;
   handleSetEmail: (email: string) => void;
@@ -14,9 +14,13 @@ const SentOTP = (props: SentOTPProps) => {
   });
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    sentOTP({ email: e.target.elements["email"].value }).then(() => {
-      props.handleSetEmail(e.target.elements["email"].value);
-      props.handleSetStep(2);
+    sentOTP({ email: e.target.elements["email"].value }).then((res) => {
+      if (res.result === false) {
+        message.error(" Email not found");
+      } else {
+        props.handleSetEmail(e.target.elements["email"].value);
+        props.handleSetStep(2);
+      }
     });
   };
   const navigate = useNavigate();
@@ -29,7 +33,7 @@ const SentOTP = (props: SentOTPProps) => {
       <div className="flex flex-col gap-1">
         <label htmlFor="email">Email</label>
         <input
-          type="text"
+          type="email"
           id="email"
           required
           className="border border-[#ccc] rounded-lg p-2"
