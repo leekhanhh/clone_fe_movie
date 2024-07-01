@@ -39,7 +39,7 @@ const customStyles = {
 const CommentItem = (props: CommentItemProps) => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [items, setItem] = useState<object[]>([]);
+  // const [items, setItem] = useState<object[]>([]);
   const [idReaction, setIdReaction] = useState<number>();
   const [check, setCheck] = useState<boolean>();
   const [editState, setEditState] = useState(false);
@@ -83,6 +83,28 @@ const CommentItem = (props: CommentItemProps) => {
       (item: object) => item.reviewId === props.commentId
     );
   };
+  const items = [
+    {
+      key: "1",
+      label: (
+        <div className="flex flex-row items-center gap-2 px-2 py-1">
+          <p className="text-base " onClick={() => setEditState(true)}>
+            edit
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <div className="flex flex-row items-center gap-2 px-2 py-1">
+          <p className="text-base " onClick={() => openModal()}>
+            delete
+          </p>
+        </div>
+      ),
+    },
+  ];
   console.log(props.listReactionComment);
   const { mutateAsync: deleteReaction } = useMutation({
     mutationKey: ["deleteReactionComment"],
@@ -95,40 +117,45 @@ const CommentItem = (props: CommentItemProps) => {
   });
   const handleCheckAccount = () => {
     if (accountProfile.account.id === props.accountId) {
-      setItem([
-        {
-          key: "1",
-          label: (
-            <div className="flex flex-row items-center gap-2 px-2 py-1">
-              <p className="text-base " onClick={() => setEditState(true)}>
-                edit
-              </p>
-            </div>
-          ),
-        },
-        {
-          key: "2",
-          label: (
-            <div className="flex flex-row items-center gap-2 px-2 py-1">
-              <p className="text-base " onClick={() => openModal()}>
-                delete
-              </p>
-            </div>
-          ),
-        },
-      ]);
+      return true;
     } else {
-      setItem([
-        {
-          key: "1",
-          label: (
-            <div className="flex flex-row items-center gap-2 px-2 py-1">
-              <p className="text-base ">report</p>
-            </div>
-          ),
-        },
-      ]);
+      return false;
     }
+    // if (accountProfile.account.id === props.accountId) {
+    //   setItem([
+    //     {
+    //       key: "1",
+    //       label: (
+    //         <div className="flex flex-row items-center gap-2 px-2 py-1">
+    //           <p className="text-base " onClick={() => setEditState(true)}>
+    //             edit
+    //           </p>
+    //         </div>
+    //       ),
+    //     },
+    //     {
+    //       key: "2",
+    //       label: (
+    //         <div className="flex flex-row items-center gap-2 px-2 py-1">
+    //           <p className="text-base " onClick={() => openModal()}>
+    //             delete
+    //           </p>
+    //         </div>
+    //       ),
+    //     },
+    //   ]);
+    // } else {
+    //   setItem([
+    //     {
+    //       key: "1",
+    //       label: (
+    //         <div className="flex flex-row items-center gap-2 px-2 py-1">
+    //           <p className="text-base ">report</p>
+    //         </div>
+    //       ),
+    //     },
+    //   ]);
+    // }
   };
   const handleEditComment = (e: any) => {
     if (e.key === "Enter") {
@@ -146,7 +173,7 @@ const CommentItem = (props: CommentItemProps) => {
     }
   };
   const handleDeleteComment = () => {
-    deleteComment(props.id).then(() => {
+    deleteComment(props.commentId).then(() => {
       message.success("Delete comment successfully");
       queryClient.invalidateQueries(["listComment", id]);
       closeModal();
@@ -192,18 +219,20 @@ const CommentItem = (props: CommentItemProps) => {
             <p>{props.userName}</p>
             <p>{dayjs(props.time).format("DD/MM/YYYY")}</p>
           </div>
-          <div className="cursor-pointer ">
-            <Dropdown
-              menu={{ items }}
-              placement="bottomRight"
-              arrow
-              trigger={["click"]}
-            >
-              <div className="">
-                <MoreIcon />
-              </div>
-            </Dropdown>
-          </div>
+          {handleCheckAccount() && (
+            <div className="cursor-pointer ">
+              <Dropdown
+                menu={{ items }}
+                placement="bottomRight"
+                arrow
+                trigger={["click"]}
+              >
+                <div className="">
+                  <MoreIcon />
+                </div>
+              </Dropdown>
+            </div>
+          )}
         </div>
         <div className="">
           {editState ? (
@@ -227,12 +256,12 @@ const CommentItem = (props: CommentItemProps) => {
           >
             <HeartIcon color={check ? "red" : " black"} />
           </div>
-          <div className="cursor-pointer hover:opacity-50">
+          {/* <div className="cursor-pointer hover:opacity-50">
             <CommentIcon />
-          </div>
-          <div className="cursor-pointer hover:opacity-50 ">
+          </div> */}
+          {/* <div className="cursor-pointer hover:opacity-50 ">
             <ReplyIcon />
-          </div>
+          </div> */}
         </div>
       </div>
       <Modal
